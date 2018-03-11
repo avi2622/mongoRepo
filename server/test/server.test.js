@@ -5,11 +5,20 @@ var {app} = require('./../server');
 
 var {todo} = require('./../models/todo');
 
+var todos = [{
+    text:'First Test Todo'
+},
+{
+    text:'Second Test Todo'
+}];
+
 beforeEach((done)=>{
-    todo.remove({}).then(()=> done());
+    todo.remove({}).then(()=>{
+        todo.insertMany(todos);
+    }).then(()=> done());
 });
 
-describe('POST /todo',()=>{
+describe('POST /todos',()=>{
     it('should create a new todo',(done)=>{
         var text = 'check the text';
 
@@ -25,7 +34,7 @@ describe('POST /todo',()=>{
                 return done(err);
             }
 
-            todo.find().then((todos)=>{
+            todo.find({text}).then((todos)=>{
                 // expect(todos.length).toBe(1);
                 // expect(todos[0].text).toBe(text);
                 done();
@@ -46,9 +55,21 @@ describe('POST /todo',()=>{
             }
 
             todo.find.then((todos)=>{
-                expect(todos.length).toBe(0);
+                expect(todos.length).toBe(2);
                 done();
             }).catch((e)=>done(e))
         });
+    });
+});
+
+describe('GET /todos',()=>{
+    it('should get all todos', (done)=>{
+        request(app)
+        .get('/todos')
+        .expect(200)
+        .expect((res)=>{
+            expect(res.body.todos.length.toBe(2))
+        })
+        .end(done);
     });
 });
